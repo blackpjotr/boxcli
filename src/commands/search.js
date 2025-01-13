@@ -4,6 +4,7 @@ const BoxCommand = require('../box-command');
 const { flags } = require('@oclif/command');
 const _ = require('lodash');
 const BoxCLIError = require('../cli-error');
+const PaginationUtils = require('../pagination-utils');
 
 const RESULTS_LIMIT = 100;
 
@@ -27,13 +28,20 @@ class SearchCommand extends BoxCommand {
 	async run() {
 		const { flags, args } = this.parse(SearchCommand);
 
-		if (flags.all && flags.limit) {
-			throw new BoxCLIError('--all and --limit flags cannot be used together.');
+		if (flags.all && (flags.limit || flags['max-items'])) {
+			throw new BoxCLIError('--all and --limit(--max-items) flags cannot be used together.');
 		}
 
-		let options = {
-			limit: RESULTS_LIMIT,
-		};
+		if (flags.limit && flags['max-items'] && flags.limit !== flags['max-items']) {
+			throw new BoxCLIError(' --limit and --max-items flags cannot be used together.');
+		}
+
+		if (!flags.all && !flags['max-items']) {
+			flags['max-items'] = flags.limit || RESULTS_LIMIT;
+			this.flags['max-items'] = flags['max-items'];
+		}
+
+		let options = PaginationUtils.handlePagination(flags);
 
 		if (flags.scope) {
 			options.scope = flags.scope;
@@ -154,16 +162,7 @@ class SearchCommand extends BoxCommand {
 
 		let results = await this.client.search.query(args.query || null, options);
 
-		// Limit the search results according to the --limit flag value (if specified) or RESULTS_LIMIT value
-		const itemsLimit = flags.limit || RESULTS_LIMIT;
-		let limitedResults = [];
-		for await (let result of { [Symbol.asyncIterator]: () => results }) {
-			let numResults = limitedResults.push(result);
-			if (!flags.all && numResults >= itemsLimit) {
-				break;
-			}
-		}
-		await this.output(limitedResults);
+		await this.output(results);
 	}
 }
 
@@ -293,6 +292,10 @@ SearchCommand.flags = {
 	}),
 	limit: flags.integer({
 		description: 'Defines the maximum number of items to return. Default value is 100.',
+	}),
+	'max-items': flags.integer({
+		description: 'A value that indicates the maximum number of results to return.',
+		hidden: true
 	}),
 	all: flags.boolean({
 		description: 'Returns all search results.',

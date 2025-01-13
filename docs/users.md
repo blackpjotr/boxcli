@@ -13,6 +13,7 @@ List all Box users
 * [`box users:groups ID`](#box-usersgroups-id)
 * [`box users:invite EMAIL ENTERPRISEID`](#box-usersinvite-email-enterpriseid)
 * [`box users:search NAME`](#box-userssearch-name)
+* [`box users:terminate-session`](#box-usersterminate-session)
 * [`box users:transfer-content USERID NEWUSERID`](#box-userstransfer-content-userid-newuserid)
 * [`box users:update ID`](#box-usersupdate-id)
 
@@ -41,7 +42,14 @@ OPTIONS
   --fields=fields                        Comma separated list of fields to show
   --filter=filter                        Search term to filter users on; matches prefixes of user name and login fields
   --json                                 Output formatted JSON
+
+  --max-items=max-items                  A value that indicates the maximum number of results to return. This only
+                                         specifies a maximum boundary and will not guarantee the minimum number of
+                                         results returned. When the max-items (x) is greater than 1000, then the maximum
+                                         ceil(x/1000) requests will be made.
+
   --no-color                             Turn off colors for logging
+
   --save-to-file-path=save-to-file-path  Override default file path to save report
 
 ALIASES
@@ -51,7 +59,7 @@ EXAMPLE
   box users
 ```
 
-_See code: [src/commands/users/index.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/users/index.js)_
+_See code: [src/commands/users/index.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/users/index.js)_
 
 ## `box users:create NAME [LOGIN]`
 
@@ -134,11 +142,15 @@ OPTIONS
   --timezone=timezone                                                        The user's timezone. Input format follows
                                                                              tz database timezones
 
+  --tracking-codes=tracking-codes                                            Comma-separated list of key-value pairs to
+                                                                             associate with the user. Format is
+                                                                             name=value,name=value
+
 EXAMPLE
   box users:create "John Doe" jdoe@example.com
 ```
 
-_See code: [src/commands/users/create.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/users/create.js)_
+_See code: [src/commands/users/create.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/users/create.js)_
 
 ## `box users:delete ID`
 
@@ -172,7 +184,7 @@ EXAMPLE
   box users:delete 33333
 ```
 
-_See code: [src/commands/users/delete.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/users/delete.js)_
+_See code: [src/commands/users/delete.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/users/delete.js)_
 
 ## `box users:email-aliases USERID`
 
@@ -207,7 +219,7 @@ EXAMPLE
   box users:email-aliases 33333
 ```
 
-_See code: [src/commands/users/email-aliases/index.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/users/email-aliases/index.js)_
+_See code: [src/commands/users/email-aliases/index.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/users/email-aliases/index.js)_
 
 ## `box users:email-aliases:add USERID EMAIL`
 
@@ -251,7 +263,7 @@ EXAMPLE
   box users:email-aliases:add 33333 user+alias@example.com
 ```
 
-_See code: [src/commands/users/email-aliases/add.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/users/email-aliases/add.js)_
+_See code: [src/commands/users/email-aliases/add.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/users/email-aliases/add.js)_
 
 ## `box users:email-aliases:remove USERID ALIASID`
 
@@ -287,7 +299,7 @@ EXAMPLE
   box users:email-aliases:remove 33333 12345
 ```
 
-_See code: [src/commands/users/email-aliases/remove.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/users/email-aliases/remove.js)_
+_See code: [src/commands/users/email-aliases/remove.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/users/email-aliases/remove.js)_
 
 ## `box users:get [ID]`
 
@@ -319,7 +331,7 @@ EXAMPLE
   box users:get 33333
 ```
 
-_See code: [src/commands/users/get.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/users/get.js)_
+_See code: [src/commands/users/get.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/users/get.js)_
 
 ## `box users:groups ID`
 
@@ -344,7 +356,14 @@ OPTIONS
   --csv                                  Output formatted CSV
   --fields=fields                        Comma separated list of fields to show
   --json                                 Output formatted JSON
+
+  --max-items=max-items                  A value that indicates the maximum number of results to return. This only
+                                         specifies a maximum boundary and will not guarantee the minimum number of
+                                         results returned. When the max-items (x) is greater than 1000, then the maximum
+                                         ceil(x/1000) requests will be made.
+
   --no-color                             Turn off colors for logging
+
   --save-to-file-path=save-to-file-path  Override default file path to save report
 
 ALIASES
@@ -354,7 +373,7 @@ EXAMPLE
   box users:groups 33333
 ```
 
-_See code: [src/commands/users/groups.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/users/groups.js)_
+_See code: [src/commands/users/groups.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/users/groups.js)_
 
 ## `box users:invite EMAIL ENTERPRISEID`
 
@@ -390,7 +409,7 @@ EXAMPLE
   box users:invite user@example.com 12345
 ```
 
-_See code: [src/commands/users/invite.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/users/invite.js)_
+_See code: [src/commands/users/invite.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/users/invite.js)_
 
 ## `box users:search NAME`
 
@@ -425,7 +444,41 @@ EXAMPLE
   box users:search "John Doe"
 ```
 
-_See code: [src/commands/users/search.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/users/search.js)_
+_See code: [src/commands/users/search.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/users/search.js)_
+
+## `box users:terminate-session`
+
+Validates the roles and permissions of the user, and creates asynchronous jobs to terminate the user's sessions.
+
+```
+USAGE
+  $ box users:terminate-session
+
+OPTIONS
+  -h, --help                             Show CLI help
+  -q, --quiet                            Suppress any non-error output to stderr
+  -s, --save                             Save report to default reports folder on disk
+  -t, --token=token                      Provide a token to perform this call
+  -v, --verbose                          Show verbose output, which can be helpful for debugging
+  -y, --yes                              Automatically respond yes to all confirmation prompts
+  --as-user=as-user                      Provide an ID for a user
+  --bulk-file-path=bulk-file-path        File path to bulk .csv or .json objects
+  --csv                                  Output formatted CSV
+  --fields=fields                        Comma separated list of fields to show
+  --json                                 Output formatted JSON
+  --no-color                             Turn off colors for logging
+  --save-to-file-path=save-to-file-path  Override default file path to save report
+  --user-ids=user-ids                    A list of user IDs
+  --user-logins=user-logins              A list of user logins
+
+ALIASES
+  $ box users:terminate-session
+
+EXAMPLE
+  box users:terminate-session --user-ids 123 345 --user-logins abc@example.com def@example.com
+```
+
+_See code: [src/commands/users/terminate-session.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/users/terminate-session.js)_
 
 ## `box users:transfer-content USERID NEWUSERID`
 
@@ -462,7 +515,7 @@ EXAMPLE
   box users:transfer-content 33333 44444
 ```
 
-_See code: [src/commands/users/transfer-content.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/users/transfer-content.js)_
+_See code: [src/commands/users/transfer-content.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/users/transfer-content.js)_
 
 ## `box users:update ID`
 
@@ -550,8 +603,12 @@ OPTIONS
   --timezone=timezone                                                        The user's timezone. Input format follows
                                                                              tz database timezones
 
+  --tracking-codes=tracking-codes                                            Comma-separated list of key-value pairs to
+                                                                             associate with the user. Format is
+                                                                             name=value,name=value
+
 EXAMPLE
   box users:update 33333 --status inactive
 ```
 
-_See code: [src/commands/users/update.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/users/update.js)_
+_See code: [src/commands/users/update.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/users/update.js)_

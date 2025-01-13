@@ -4,7 +4,8 @@ const _ = require('lodash');
 const BoxCLIError = require('./cli-error');
 const os = require('os');
 const path = require('path');
-const fs = require('fs-extra');
+const fs = require('fs');
+const mkdirp = require('mkdirp');
 
 const REQUIRED_CONFIG_VALUES = Object.freeze([
 	'boxAppSettings.clientID',
@@ -184,6 +185,50 @@ function parseMetadataString(input) {
 }
 
 /**
+ * Parse a string into a JSON object
+ *
+ * @param {string} inputString The string to parse
+ * @param {string[]} keys The keys to parse from the string
+ * @returns {Object} The parsed object
+ */
+function parseStringToObject(inputString, keys) {
+	const result = {};
+
+	while (inputString.length > 0) {
+		inputString = inputString.trim();
+		let parsedKey = inputString.split('=')[0];
+		inputString = inputString.substring(inputString.indexOf('=') + 1);
+
+		// Find the next key or the end of the string
+		let nextKeyIndex = inputString.length;
+		for (let key of keys) {
+			let keyIndex = inputString.indexOf(key);
+			if (keyIndex !== -1 && keyIndex < nextKeyIndex) {
+				nextKeyIndex = keyIndex;
+			}
+		}
+
+		let parsedValue = inputString.substring(0, nextKeyIndex).trim();
+		if (parsedValue.endsWith(',') && nextKeyIndex !== inputString.length) {
+			parsedValue = parsedValue.substring(0, parsedValue.length - 1);
+		}
+		if (parsedValue.startsWith('"') && parsedValue.endsWith('"')) {
+			parsedValue = parsedValue.substring(1, parsedValue.length - 1);
+		}
+
+		if (!keys.includes(parsedKey)) {
+			throw new BoxCLIError(
+				`Invalid key '${parsedKey}'. Valid keys are ${keys.join(', ')}`
+			);
+		}
+
+		result[parsedKey] = parsedValue;
+		inputString = inputString.substring(nextKeyIndex);
+	}
+	return result;
+}
+
+/**
  * Check if directory exists and creates it if shouldCreate flag was passed.
  *
  * @param {string} dirPath Directory path to check and create
@@ -195,7 +240,7 @@ async function checkDir(dirPath, shouldCreate) {
 	/* eslint-disable no-sync */
 	if (!fs.existsSync(dirPath)) {
 		if (shouldCreate) {
-			await fs.mkdirp(dirPath, { recursive: true });
+			await mkdirp(dirPath);
 		} else {
 			throw new BoxCLIError(
 				`The ${dirPath} path does not exist. Either create it, or pass the --create-path flag set to true`
@@ -203,6 +248,54 @@ async function checkDir(dirPath, shouldCreate) {
 		}
 	}
 }
+
+/* eslint-disable require-jsdoc, require-await, no-shadow, promise/avoid-new, promise/prefer-await-to-callbacks */
+
+async function readFileAsync(path, options) {
+	return new Promise((resolve, reject) => {
+		fs.readFile(path, options || {}, (err, result) => {
+			if (err) {
+				return reject(err);
+			}
+			return resolve(result);
+		});
+	});
+}
+
+async function writeFileAsync(file, data, options) {
+	return new Promise((resolve, reject) => {
+		fs.writeFile(file, data, options || {}, (err, result) => {
+			if (err) {
+				return reject(err);
+			}
+			return resolve(result);
+		});
+	});
+}
+
+async function readdirAsync(path, options) {
+	return new Promise((resolve, reject) => {
+		fs.readdir(path, options || {}, (err, result) => {
+			if (err) {
+				return reject(err);
+			}
+			return resolve(result);
+		});
+	});
+}
+
+async function unlinkAsync(path) {
+	return new Promise((resolve, reject) => {
+		fs.unlink(path, (err, result) => {
+			if (err) {
+				return reject(err);
+			}
+			return resolve(result);
+		});
+	});
+}
+
+/* eslint-enable require-jsdoc, require-await, no-shadow, promise/avoid-new, promise/prefer-await-to-callbacks */
 
 module.exports = {
 	/**
@@ -243,6 +336,20 @@ module.exports = {
 	},
 
 	/**
+	 * Unescape slashes from the given string.
+	 *
+	 * @param {string} value The raw string which can contains escaped slashes
+	 * @returns {string} A string with unescaped escaping in newline and tab characters.
+	 */
+	unescapeSlashes(value) {
+		try {
+			return JSON.parse(`"${value}"`);
+		} catch (e) {
+			return value;
+		}
+	},
+
+	/**
 	 * Parses the key=val string format for metadata into an object {key: val}
 	 *
 	 * @param {string} value The string containing metadata key and value
@@ -280,5 +387,10 @@ module.exports = {
 	parseMetadataOp(value) {
 		return parseMetadataString(value);
 	},
+	parseStringToObject,
 	checkDir,
+	readFileAsync,
+	writeFileAsync,
+	readdirAsync,
+	unlinkAsync,
 };

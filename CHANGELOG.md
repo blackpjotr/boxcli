@@ -2,6 +2,147 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.16.0](https://github.com/box/boxcli/compare/v3.15.0...v3.16.0) (2024-11-25)
+
+
+### New Features and Enhancements
+
+* add support for `template_id` during sign request creation ([#549](https://github.com/box/boxcli/issues/549)) ([95963c1](https://github.com/box/boxcli/commit/95963c19650937f9d67c47184cc8a743166eae60))
+
+### Bug Fixes
+
+* Change zone name in the mass update user zone script ([#546](https://github.com/box/boxcli/issues/546)) ([1a1d603](https://github.com/box/boxcli/commit/1a1d603267b928e08df32394637f53264e9e57c9))
+
+## [3.15.0](https://github.com/box/boxcli/compare/v3.14.1...v3.15.0) (2024-08-06)
+
+
+### New Features and Enhancements
+
+* Support AI APIs using Box Node SDK ([#539](https://github.com/box/boxcli/issues/539)) ([59551d2](https://github.com/box/boxcli/commit/59551d2153549b5a87b2c3fae01eb3089d640c89))
+
+### [3.14.1](https://github.com/box/boxcli/compare/v3.14.0...v3.14.1) (2024-06-06)
+
+
+### Bug Fixes
+
+* Fix bulk action in `search` command ([#528](https://github.com/box/boxcli/issues/528)) ([782b0e6](https://github.com/box/boxcli/commit/782b0e6b00905d9724289cb05cf03a708c32ebb3))
+* Fix bulk operation for `sign-requests:create` command ([#531](https://github.com/box/boxcli/issues/531)) ([6d9cd6b](https://github.com/box/boxcli/commit/6d9cd6b82088185c1b98e8c4ed9ac26af4ee3362))
+
+## [3.14.0](https://github.com/box/boxcli/compare/v3.13.0...v3.14.0) (2024-03-06)
+
+
+### New Features and Enhancements
+
+* Add support for `vanity_name` when creating `shared-links` ([#524](https://github.com/box/boxcli/issues/524)) ([38164bc](https://github.com/box/boxcli/commit/38164bc716879aef0a8a2b973a9c6fc7eb705978))
+* Support sign request signer group ID ([#521](https://github.com/box/boxcli/issues/521)) ([f7b1b44](https://github.com/box/boxcli/commit/f7b1b4409e0f72c264cc23a0f1ca1849060bf121))
+
+## [3.13.0](https://github.com/box/boxcli/compare/v3.12.2...v3.13.0) (2024-02-22)
+
+
+### New Features and Enhancements
+
+* Add additional `UseDisplayName` flag to metadata extraction script ([#515](https://github.com/box/boxcli/issues/515)) ([b900fdb](https://github.com/box/boxcli/commit/b900fdb984345c0fdfeb09e531f6a358ad8c3b8e))
+* Add additional context info when throw exception ([#519](https://github.com/box/boxcli/issues/519)) ([b99a58d](https://github.com/box/boxcli/commit/b99a58d930eccf5363c82b84e4415336d7d69541))
+* Support overwrite/skip folder download ([#516](https://github.com/box/boxcli/issues/516)) ([300f914](https://github.com/box/boxcli/commit/300f914ba8bb94d9c399699d126d81aba0b22142))
+
+### Bug Fixes
+
+* Fix metadata extraction script ([#514](https://github.com/box/boxcli/issues/514)) ([2fad540](https://github.com/box/boxcli/commit/2fad540badf60538fe1456f8071b74bf917f7464))
+* Fix the functionality of the overwrite flag ([#513](https://github.com/box/boxcli/issues/513)) ([f4bf7af](https://github.com/box/boxcli/commit/f4bf7af8e0bbdf7e73fab23d920259ef16672be0))
+
+### [3.12.2](https://github.com/box/boxcli/compare/v3.12.1...v3.12.2) (2023-11-08)
+
+
+### Bug Fixes
+
+* Bump box-node-sdk ([#510](https://github.com/box/boxcli/issues/510)) ([2621f41](https://github.com/box/boxcli/commit/2621f4121999ff6e9d0cc0c391dfd3aa93aefe49))
+
+### [3.12.1](https://github.com/box/boxcli/compare/v3.12.0...v3.12.1) (2023-11-06)
+
+
+### Bug Fixes
+
+* force offset based pagination in get users ([#504](https://github.com/box/boxcli/issues/504)) ([9bed083](https://github.com/box/boxcli/commit/9bed083d59b2386d045619fdf2f3ea915e44d231))
+
+## [3.12.0](https://github.com/box/boxcli/compare/v3.11.0...v3.12.0) (2023-09-18)
+
+
+### New Features and Enhancements
+
+* Support sign templates ([#496](https://github.com/box/boxcli/issues/496)) ([955106f](https://github.com/box/boxcli/commit/955106ffa5d7938c567e5440868f2ec3c87045ce))
+
+## [3.11.0](https://github.com/box/boxcli/compare/v3.10.0...v3.11.0) (2023-09-05)
+
+
+### New Features and Enhancements
+
+* detect and exclude the byte order mark (BOM) from the CSV input if present ([#492](https://github.com/box/boxcli/issues/492)) ([e147919](https://github.com/box/boxcli/commit/e14791955b53be5c15f8580ee1f9841d8227803b))
+
+## [3.10.0](https://github.com/box/boxcli/compare/v3.9.2...v3.10.0) (2023-08-16)
+
+
+### New Features and Enhancements
+
+* Support update user tracking codes ([#489](https://github.com/box/boxcli/issues/489)) ([159e6d0](https://github.com/box/boxcli/commit/159e6d07fa91f2b199ca85207a4cad5cf4274f0e))
+
+### [3.9.2](https://github.com/box/boxcli/compare/v3.9.1...v3.9.2) (2023-08-08)
+
+
+### Bug Fixes
+
+* Fix escaped slashes when passing an input to command ([#486](https://github.com/box/boxcli/issues/486)) ([7670210](https://github.com/box/boxcli/commit/7670210ffb5c38cef8dd153e823029d5237080b6))
+
+### [3.9.1](https://github.com/box/boxcli/compare/v3.9.0...v3.9.1) (2023-07-19)
+
+
+## [3.9.0](https://github.com/box/boxcli/compare/v3.8.0...v3.9.0) (2023-06-02)
+
+
+### New Features and Enhancements
+
+* add `max-items`, improve list endpoints performance ([#470](https://github.com/box/boxcli/issues/470)) ([8f386f3](https://github.com/box/boxcli/commit/8f386f3b7c4ff4efbaa941321fd672694ce3c7a1))
+* Add support for Integration Mappings API ([#472](https://github.com/box/boxcli/issues/472)) ([bbf2548](https://github.com/box/boxcli/commit/bbf2548223e0d07ce2412c04991e7d8f00022fa7))
+* New fields in `retention-policy` and `retention-policy-assignment` ([#466](https://github.com/box/boxcli/issues/466)) ([f960e59](https://github.com/box/boxcli/commit/f960e59aaf55fe0a0507e9f4c9d867e7c3dd039a))
+
+## [3.8.0](https://github.com/box/boxcli/compare/v3.7.0...v3.8.0) (2023-03-03)
+
+
+### New Features and Enhancements
+
+* add alias for metadata cascade policy create ([#460](https://github.com/box/boxcli/issues/460)) ([8d2f683](https://github.com/box/boxcli/commit/8d2f683e092c036efe352e6fd70904083ad7c208))
+* Add support for `--reauthorize` flag in login command ([#457](https://github.com/box/boxcli/issues/457)) ([f653a0d](https://github.com/box/boxcli/commit/f653a0d526c7194f0a5e80dc837f0f16a9d4f27b))
+
+### Bug Fixes
+
+* Fix `keychain` access by bumping `keychain` library to `1.4.0` ([#459](https://github.com/box/boxcli/issues/459)) ([56919ce](https://github.com/box/boxcli/commit/56919cefabef6de4d96a1f69f7c80740a680876c))
+* Fix unit tests ([#456](https://github.com/box/boxcli/issues/456)) ([f89d9ef](https://github.com/box/boxcli/commit/f89d9ef5c3c4e7bf00c0be40f128428b1e7e6983))
+
+## [3.7.0](https://github.com/box/boxcli/compare/v3.6.0...v3.7.0) (2023-01-19)
+
+
+### New Features and Enhancements
+
+* Add more flags for folder update collaborators ([#438](https://github.com/box/boxcli/issues/438)) ([83ac6d7](https://github.com/box/boxcli/commit/83ac6d7c8eeb7f3dc8562c8132cade4f5af80ee1))
+* Add support session termination ([#446](https://github.com/box/boxcli/issues/446)) ([aef15a8](https://github.com/box/boxcli/commit/aef15a8d2c7ee904db320d879deb6ebf0f934d22))
+
+### Bug Fixes
+
+* Fix delete token cache from disk ([#445](https://github.com/box/boxcli/issues/445)) ([aafb68a](https://github.com/box/boxcli/commit/aafb68ae38a8280bd97cf978042a8df5b71b2f52))
+* Fix metadata template update when adding multiple options to enum ([#442](https://github.com/box/boxcli/issues/442)) ([8779eec](https://github.com/box/boxcli/commit/8779eecf24bda5b093bc891f5097879e1876b601))
+* single file upload on Node 16 ([#441](https://github.com/box/boxcli/issues/441)) ([d94ab35](https://github.com/box/boxcli/commit/d94ab35a38938daf4edbbd134774a3809facecbd))
+
+## [3.6.0](https://github.com/box/boxcli/compare/v3.5.0...v3.6.0) (2022-11-22)
+
+
+### New Features and Enhancements
+
+* Add `id` and `type` field  to shared-links:create response ([#427](https://github.com/box/boxcli/issues/427)) ([5ea4cb8](https://github.com/box/boxcli/commit/5ea4cb82294188dd30563ef9cea2c8e0b76bbfae))
+* Add fields disposition_at field for files under retention ([#429](https://github.com/box/boxcli/issues/429)) ([db824ef](https://github.com/box/boxcli/commit/db824ef0b4111810b7902896062c950ef9ac01b3))
+
+### Bug Fixes
+
+* Fix `event:poll` polling-interval ([#430](https://github.com/box/boxcli/issues/430)) ([9ada74b](https://github.com/box/boxcli/commit/9ada74b09eb5aa0e09881946a4f7f30e2d68e037))
+
 ## [3.5.0](https://github.com/box/boxcli/compare/v3.4.0...v3.5.0) (2022-11-02)
 
 

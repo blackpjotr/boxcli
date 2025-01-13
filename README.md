@@ -1,9 +1,20 @@
+<p align="center">
+  <img src="https://github.com/box/sdks/blob/master/images/box-dev-logo.png" alt= “box-dev-logo” width="30%" height="50%">
+</p>
+
 # Box CLI
 
 [![Project Status](http://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges)
-![Platform](https://img.shields.io/badge/node-12--14-blue)
+![Platform](https://img.shields.io/badge/node-14--18-blue)
 [![Coverage](https://coveralls.io/repos/github/box/boxcli/badge.svg?branch=main)](https://coveralls.io/github/box/boxcli?branch=main)
 
+> 🚨**NEW MAJOR VERSION ALERT**
+>
+> We’re excited to announce that by the end of January 2025, we’ll be releasing Box CLI 4.0.0! This new major version introduces exciting features and improvements, including:
+> * Upgrading the oclif framework from v1 to v4
+> * Adding support for Node 20 and 22, while dropping support for Node 14 and 16
+>
+> Stay tuned!
 
 The Box CLI is a user-friendly command line tool which allows both technical and non-technical users to leverage the Box API to perform routine or bulk actions. There is no need to write any code, as these actions are executed through a [set of commands](#command-topics).
 
@@ -17,17 +28,21 @@ Among other features, Box CLI includes the following functionality:
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Getting Started](#getting-started)
-  - [CLI Installation](#cli-installation)
-  - [CLI and Server Authentication with JWT](#cli-and-server-authentication-with-jwt)
-- [Usage](#usage)
+- [Box CLI](#box-cli)
+  - [Table of contents](#table-of-contents)
+  - [Getting Started](#getting-started)
+    - [CLI Installation](#cli-installation)
+      - [Windows \& macOS Installers](#windows--macos-installers)
+      - [Linux \& Node install](#linux--node-install)
+    - [CLI and Server Authentication with JWT](#cli-and-server-authentication-with-jwt)
+  - [Usage](#usage)
 - [Command Topics](#command-topics)
-- [Questions, Bugs, and Feature Requests?](#questions-bugs-and-feature-requests)
-- [Versions](#versions)
-  - [Supported Version](#supported-version)
-  - [Version schedule](#version-schedule)
-- [Contributing to the Box CLI](#contributing-to-the-box-cli)
-- [Copyright and License](#copyright-and-license)
+  - [Questions, Bugs, and Feature Requests?](#questions-bugs-and-feature-requests)
+  - [Versions](#versions)
+    - [Supported Version](#supported-version)
+    - [Version schedule](#version-schedule)
+  - [Contributing to the Box CLI](#contributing-to-the-box-cli)
+  - [Copyright and License](#copyright-and-license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -51,7 +66,7 @@ npm install --global @box/cli
 ### CLI and Server Authentication with JWT
 
 Alternatively, to get started with the Box CLI, [download and install](#CLI-Installation) CLI, set up a Box application using Server Authentication with JWT and
-download the JSON configuration file from the Configuration page of your app in the
+download the JSON configuration file from the Configuration page of your platform app in the
 [Box Developer Console][dev-console] following [JWT CLI Guide][jwt-guide].  Then, set up the CLI by pointing it to your configuration file:
 
 ```sh-session
@@ -121,6 +136,7 @@ Avatar URL: 'https://app.box.com/api/avatar/large/77777'
 <!-- commands -->
 # Command Topics
 
+* [`box ai`](docs/ai.md) - Sends an AI request to supported LLMs and returns an answer
 * [`box autocomplete`](docs/autocomplete.md) - Display autocomplete installation instructions
 * [`box collaboration-allowlist`](docs/collaboration-allowlist.md) - List collaboration allowlist entries
 * [`box collaborations`](docs/collaborations.md) - Manage collaborations
@@ -134,8 +150,9 @@ Avatar URL: 'https://app.box.com/api/avatar/large/77777'
 * [`box folders`](docs/folders.md) - Manage folders
 * [`box groups`](docs/groups.md) - List all groups
 * [`box help`](docs/help.md) - Display help for the Box CLI
+* [`box integration-mappings`](docs/integration-mappings.md) - List Slack integration mappings
 * [`box legal-hold-policies`](docs/legal-hold-policies.md) - List legal hold policies
-* [`box login`](docs/login.md) - Sign in with OAuth and set a new environment
+* [`box login`](docs/login.md) - Sign in with OAuth and set a new environment or update an existing if reauthorize flag is used
 * [`box metadata-cascade-policies`](docs/metadata-cascade-policies.md) - List the metadata cascade policies on a folder
 * [`box metadata-query`](docs/metadata-query.md) - Create a search using SQL-like syntax to return items that match specific metadata
 * [`box metadata-templates`](docs/metadata-templates.md) - Get all metadata templates in your Enterprise
@@ -146,6 +163,7 @@ Avatar URL: 'https://app.box.com/api/avatar/large/77777'
 * [`box search`](docs/search.md) - Search for files and folders in your Enterprise
 * [`box shared-links`](docs/shared-links.md) - Manage shared links
 * [`box sign-requests`](docs/sign-requests.md) - List sign requests
+* [`box sign-templates`](docs/sign-templates.md) - List sign templates
 * [`box storage-policies`](docs/storage-policies.md) - List storage policies
 * [`box tasks`](docs/tasks.md) - Manage tasks
 * [`box terms-of-service`](docs/terms-of-service.md) - List terms of services for your enterprise
@@ -178,7 +196,7 @@ A current release is on the leading edge of our SDK development, and is intended
 
 | Version | Supported Environments  | State     | First Release | EOL/Terminated |
 |---------|-------------------------|-----------|---------------|----------------|
-| 3       | Node.js >= 12 and <= 14 | Supported | 01 Feb 2022   | TBD            |
+| 3       | Node.js >= 14           | Supported | 01 Feb 2022   | TBD            |
 | 2       |                         | EOL       | 14 Dec 2018   | 01 Feb 2022    |
 | 1       |                         | EOL       | 01 Nov 2017   | 14 Dec 2018    |
 

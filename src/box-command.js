@@ -5,7 +5,8 @@ const { Command, flags } = require('@oclif/command');
 const chalk = require('chalk');
 const util = require('util');
 const _ = require('lodash');
-const fs = require('fs-extra');
+const fs = require('fs');
+const mkdirp = require('mkdirp');
 const os = require('os');
 const path = require('path');
 const yaml = require('js-yaml');
@@ -281,8 +282,8 @@ class BoxCommand extends Command {
 	 * @returns {void}
 	 */
 	async bulkOutputRun() {
-		const allPossibleArgs = this.constructor.args.map((arg) => arg.name);
-		const allPossibleFlags = Object.keys(this.constructor.flags);
+		const allPossibleArgs = (this.constructor.args || []).map((arg) => arg.name);
+		const allPossibleFlags = Object.keys(this.constructor.flags || []);
 		// Map from matchKey (arg/flag name in all lower-case characters) => {type, fieldKey}
 		let fieldMapping = Object.assign(
 			{},
@@ -323,7 +324,7 @@ class BoxCommand extends Command {
 				this.bulkErrors.push({
 					index: bulkEntryIndex,
 					data: bulkData,
-					error: err,
+					error: this.wrapError(err),
 				});
 			}
 			/* eslint-enable no-await-in-loop */
@@ -360,9 +361,18 @@ class BoxCommand extends Command {
 				}) failed with error:}`
 			);
 			let err = errorInfo.error;
+			let contextInfo;
+			if (err.response && err.response.body && err.response.body.context_info) {
+				contextInfo = formatObject(err.response.body.context_info);
+				// Remove color codes from context info
+				// eslint-disable-next-line no-control-regex
+				contextInfo = contextInfo.replace(/\u001b\[\d+m/gu, '');
+				// Remove \n with os.EOL
+				contextInfo = contextInfo.replace(/\n/gu, os.EOL);
+			}
 			let errMsg = chalk`{redBright ${
 				this.flags && this.flags.verbose ? err.stack : err.message
-			}${os.EOL}}`;
+			}${os.EOL}${contextInfo ? contextInfo + os.EOL : ''}}`;
 			this.info(errMsg);
 		});
 	}
@@ -493,6 +503,7 @@ class BoxCommand extends Command {
 	 */
 	async _handleCsvFile(fileContents, fieldMapping) {
 		let parsedData = await csvParse(fileContents, {
+			bom: true,
 			delimiter: ',',
 			cast(value, context) {
 				if (value.length === 0) {
@@ -638,12 +649,17 @@ class BoxCommand extends Command {
 	 * @returns {void}
 	 */
 	disableRequiredArgsAndFlags() {
-		Object.keys(this.constructor.args).forEach((key) => {
-			this.constructor.args[key].required = false;
-		});
-		Object.keys(this.constructor.flags).forEach((key) => {
-			this.constructor.flags[key].required = false;
-		});
+		if (this.constructor.args !== undefined) {
+			Object.keys(this.constructor.args).forEach((key) => {
+				this.constructor.args[key].required = false;
+			});
+		}
+
+		if (this.constructor.flags !== undefined) {
+			Object.keys(this.constructor.flags).forEach((key) => {
+				this.constructor.flags[key].required = false;
+			});
+		}
 	}
 
 	/**
@@ -735,7 +751,7 @@ class BoxCommand extends Command {
 				client = sdk.getPersistentClient(tokenInfo, tokenCache);
 			} catch (err) {
 				throw new BoxCLIError(
-					`Can't load the default OAuth environment "${environmentsObj.default}". Please login again or provide a token.`
+					`Can't load the default OAuth environment "${environmentsObj.default}". Please reauthorize selected environment, login again or provide a token.`
 				);
 			}
 		} else if (environmentsObj.default) {
@@ -783,13 +799,6 @@ class BoxCommand extends Command {
 			);
 			DEBUG.init('Initialized client from environment config');
 
-			if (environment.useDefaultAsUser) {
-				client.asUser(environment.defaultAsUserId);
-				DEBUG.init(
-					'Impersonating default user ID %s',
-					environment.defaultAsUserId
-				);
-			}
 		} else {
 			// No environments set up yet!
 			throw new BoxCLIError(
@@ -799,11 +808,18 @@ class BoxCommand extends Command {
 				Or, supply a token with your command with --token.`.replace(/^\s+/gmu, '')
 			);
 		}
+
+		// Using the as-user flag should have precedence over the environment setting
 		if (this.flags['as-user']) {
 			client.asUser(this.flags['as-user']);
-			DEBUG.init('Impersonating user ID %s', this.flags['as-user']);
+			DEBUG.init('Impersonating user ID %s using the ID provided via the --as-user flag', this.flags['as-user']);
+		} else if (!this.flags.token && environment.useDefaultAsUser) { // We don't want to use any environment settings if a token is passed in the command
+			client.asUser(environment.defaultAsUserId);
+			DEBUG.init(
+				'Impersonating default user ID %s using environment configuration',
+				environment.defaultAsUserId
+			);
 		}
-
 		return client;
 	}
 
@@ -900,7 +916,7 @@ class BoxCommand extends Command {
 				},
 			});
 
-			writeFunc = async(savePath) => {
+			writeFunc = async (savePath) => {
 				await pipeline(
 					stringifiedOutput,
 					appendNewLineTransform,
@@ -908,14 +924,14 @@ class BoxCommand extends Command {
 				);
 			};
 
-			logFunc = async() => {
+			logFunc = async () => {
 				await this.logStream(stringifiedOutput);
 			};
 		} else {
 			stringifiedOutput = await this._stringifyOutput(formattedOutputData);
 
-			writeFunc = async(savePath) => {
-				await fs.writeFile(savePath, stringifiedOutput + os.EOL, {
+			writeFunc = async (savePath) => {
+				await utils.writeFileAsync(savePath, stringifiedOutput + os.EOL, {
 					encoding: 'utf8',
 				});
 			};
@@ -923,6 +939,18 @@ class BoxCommand extends Command {
 			logFunc = () => this.log(stringifiedOutput);
 		}
 		return this._writeOutput(writeFunc, logFunc);
+	}
+
+	/**
+	 * Check if max-items has been reached.
+	 *
+	 * @param {number} maxItems Total number of items to return
+	 * @param {number} itemsCount Current number of items
+	 * @returns {boolean} True if limit has been reached, otherwise false
+	 * @private
+	 */
+	maxItemsReached(maxItems, itemsCount) {
+		return maxItems && itemsCount >= maxItems;
 	}
 
 	/**
@@ -948,6 +976,11 @@ class BoxCommand extends Command {
 			let entry = await obj.next();
 			while (!entry.done) {
 				output.push(entry.value);
+
+				if (this.maxItemsReached(this.flags['max-items'], output.length)) {
+					break;
+				}
+
 				/* eslint-disable no-await-in-loop */
 				entry = await obj.next();
 				/* eslint-enable no-await-in-loop */
@@ -1186,6 +1219,27 @@ class BoxCommand extends Command {
 	}
 
 	/**
+	 * Wraps filtered error in an error with a user-friendly description
+	 *
+	 * @param {Error} err  The thrown error
+	 * @returns {Error} Error wrapped in an error with user friendly description
+	 */
+	wrapError(err) {
+		let messageMap = {
+			'invalid_grant - Refresh token has expired':
+				'Your refresh token has expired. \nPlease run this command "box login --name <ENVIRONMENT_NAME> --reauthorize" to reauthorize selected environment and then run your command again.',
+		};
+
+		for (const key in messageMap) {
+			if (err.message.includes(key)) {
+				return new BoxCLIError(messageMap[key], err);
+			}
+		}
+
+		return err;
+	}
+
+	/**
 	 * Handles an error thrown within a command
 	 *
 	 * @param {Error} err  The thrown error
@@ -1196,7 +1250,7 @@ class BoxCommand extends Command {
 			// Let the oclif default handler run first, since it handles the help and version flags there
 			/* eslint-disable promise/no-promise-in-callback */
 			DEBUG.execute('Running framework error handler');
-			await super.catch(err);
+			await super.catch(this.wrapError(err));
 			/* eslint-disable no-shadow,no-catch-shadow */
 		} catch (err) {
 			// The oclif default catch handler rethrows most errors; handle those here
@@ -1207,10 +1261,18 @@ class BoxCommand extends Command {
 				DEBUG.execute('Got EEXIT code, exiting immediately');
 				return;
 			}
-
+			let contextInfo;
+			if (err.response && err.response.body && err.response.body.context_info) {
+				contextInfo = formatObject(err.response.body.context_info);
+				// Remove color codes from context info
+				// eslint-disable-next-line no-control-regex
+				contextInfo = contextInfo.replace(/\u001b\[\d+m/gu, '');
+				// Remove \n with os.EOL
+				contextInfo = contextInfo.replace(/\n/gu, os.EOL);
+			}
 			let errorMsg = chalk`{redBright ${
 				this.flags && this.flags.verbose ? err.stack : err.message
-			}${os.EOL}}`;
+			}${os.EOL}${contextInfo ? contextInfo + os.EOL : ''}}`;
 
 			// Write the error message but let the process exit gracefully with error code so stderr gets written out
 			// @NOTE: Exiting the process in the callback enables tests to mock out stderr and run to completion!
@@ -1495,7 +1557,7 @@ class BoxCommand extends Command {
 	async _loadSettings() {
 		try {
 			if (!fs.existsSync(CONFIG_FOLDER_PATH)) {
-				fs.mkdirpSync(CONFIG_FOLDER_PATH);
+				mkdirp.sync(CONFIG_FOLDER_PATH);
 				DEBUG.init('Created config folder at %s', CONFIG_FOLDER_PATH);
 			}
 			if (!fs.existsSync(ENVIRONMENTS_FILE_PATH)) {
@@ -1529,14 +1591,14 @@ class BoxCommand extends Command {
 
 		try {
 			if (!fs.existsSync(settings.boxReportsFolderPath)) {
-				fs.mkdirpSync(settings.boxReportsFolderPath);
+				mkdirp.sync(settings.boxReportsFolderPath);
 				DEBUG.init(
 					'Created reports folder at %s',
 					settings.boxReportsFolderPath
 				);
 			}
 			if (!fs.existsSync(settings.boxDownloadsFolderPath)) {
-				fs.mkdirpSync(settings.boxDownloadsFolderPath);
+				mkdirp.sync(settings.boxDownloadsFolderPath);
 				DEBUG.init(
 					'Created downloads folder at %s',
 					settings.boxDownloadsFolderPath

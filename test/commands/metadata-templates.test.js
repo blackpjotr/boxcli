@@ -48,6 +48,22 @@ describe('Metadata Templates', () => {
 			.it('should create cascade policy (YAML Output)', ctx => {
 				assert.equal(ctx.stdout, yamlOutput);
 			});
+
+		test
+			.nock(TEST_API_ROOT, api => api
+				.post('/2.0/metadata_cascade_policies', {scope, templateKey, folder_id: folderID })
+				.reply(201, fixture)
+			)
+			.stdout()
+			.command([
+				'metadata-cascade-policies:create',
+				templateKey,
+				`--folder=${folderID}`,
+				'--token=test'
+			])
+			.it('should create cascade policy (command alias)', ctx => {
+				assert.equal(ctx.stdout, yamlOutput);
+			});
 	});
 
 	describe('metadata-templates:get', () => {
@@ -378,6 +394,13 @@ describe('Metadata Templates', () => {
 				},
 			},
 			{
+				op: 'addEnumOption',
+				fieldKey: 'key1',
+				data: {
+					key: 'optionKey2',
+				},
+			},
+			{
 				op: 'addField',
 				data: {
 					type: 'enum',
@@ -480,6 +503,7 @@ describe('Metadata Templates', () => {
 				'--no-copy-instance-on-item-copy',
 				'--add-enum-option=key1',
 				'--option=optionKey1',
+				'--option=optionKey2',
 				'--enum=Field Display Name',
 				'--description=My New Field',
 				'--field-key=key2',

@@ -13,6 +13,7 @@ List all groups
 * [`box groups:memberships:get ID`](#box-groupsmembershipsget-id)
 * [`box groups:memberships:remove ID`](#box-groupsmembershipsremove-id)
 * [`box groups:memberships:update ID`](#box-groupsmembershipsupdate-id)
+* [`box groups:terminate-session`](#box-groupsterminate-session)
 * [`box groups:update ID`](#box-groupsupdate-id)
 
 ## `box groups`
@@ -36,7 +37,14 @@ OPTIONS
   --fields=fields                        Comma separated list of fields to show
   --filter=filter                        Search term to filter groups on; matches prefixes of group name
   --json                                 Output formatted JSON
+
+  --max-items=max-items                  A value that indicates the maximum number of results to return. This only
+                                         specifies a maximum boundary and will not guarantee the minimum number of
+                                         results returned. When the max-items (x) is greater than 1000, then the maximum
+                                         ceil(x/1000) requests will be made.
+
   --no-color                             Turn off colors for logging
+
   --save-to-file-path=save-to-file-path  Override default file path to save report
 
 ALIASES
@@ -46,7 +54,7 @@ EXAMPLE
   box groups
 ```
 
-_See code: [src/commands/groups/index.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/groups/index.js)_
+_See code: [src/commands/groups/index.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/groups/index.js)_
 
 ## `box groups:collaborations ID`
 
@@ -82,7 +90,7 @@ EXAMPLE
   box groups:collaborations 12345
 ```
 
-_See code: [src/commands/groups/collaborations.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/groups/collaborations.js)_
+_See code: [src/commands/groups/collaborations.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/groups/collaborations.js)_
 
 ## `box groups:create NAME`
 
@@ -137,7 +145,7 @@ EXAMPLE
   box groups:create "US Employees"
 ```
 
-_See code: [src/commands/groups/create.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/groups/create.js)_
+_See code: [src/commands/groups/create.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/groups/create.js)_
 
 ## `box groups:delete ID`
 
@@ -169,7 +177,7 @@ EXAMPLE
   box groups:delete 12345
 ```
 
-_See code: [src/commands/groups/delete.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/groups/delete.js)_
+_See code: [src/commands/groups/delete.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/groups/delete.js)_
 
 ## `box groups:get ID`
 
@@ -201,7 +209,7 @@ EXAMPLE
   box groups:get 12345
 ```
 
-_See code: [src/commands/groups/get.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/groups/get.js)_
+_See code: [src/commands/groups/get.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/groups/get.js)_
 
 ## `box groups:memberships ID`
 
@@ -226,7 +234,14 @@ OPTIONS
   --csv                                  Output formatted CSV
   --fields=fields                        Comma separated list of fields to show
   --json                                 Output formatted JSON
+
+  --max-items=max-items                  A value that indicates the maximum number of results to return. This only
+                                         specifies a maximum boundary and will not guarantee the minimum number of
+                                         results returned. When the max-items (x) is greater than 1000, then the maximum
+                                         ceil(x/1000) requests will be made.
+
   --no-color                             Turn off colors for logging
+
   --save-to-file-path=save-to-file-path  Override default file path to save report
 
 ALIASES
@@ -236,7 +251,7 @@ EXAMPLE
   box groups:memberships 12345
 ```
 
-_See code: [src/commands/groups/memberships/index.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/groups/memberships/index.js)_
+_See code: [src/commands/groups/memberships/index.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/groups/memberships/index.js)_
 
 ## `box groups:memberships:add USERID GROUPID`
 
@@ -277,7 +292,7 @@ EXAMPLE
   box groups:memberships:add 33333 12345
 ```
 
-_See code: [src/commands/groups/memberships/add.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/groups/memberships/add.js)_
+_See code: [src/commands/groups/memberships/add.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/groups/memberships/add.js)_
 
 ## `box groups:memberships:get ID`
 
@@ -312,7 +327,7 @@ EXAMPLE
   box groups:memberships:get 12345
 ```
 
-_See code: [src/commands/groups/memberships/get.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/groups/memberships/get.js)_
+_See code: [src/commands/groups/memberships/get.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/groups/memberships/get.js)_
 
 ## `box groups:memberships:remove ID`
 
@@ -347,7 +362,7 @@ EXAMPLE
   box groups:memberships:remove 12345
 ```
 
-_See code: [src/commands/groups/memberships/remove.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/groups/memberships/remove.js)_
+_See code: [src/commands/groups/memberships/remove.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/groups/memberships/remove.js)_
 
 ## `box groups:memberships:update ID`
 
@@ -387,7 +402,40 @@ EXAMPLE
   box groups:memberships:update
 ```
 
-_See code: [src/commands/groups/memberships/update.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/groups/memberships/update.js)_
+_See code: [src/commands/groups/memberships/update.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/groups/memberships/update.js)_
+
+## `box groups:terminate-session`
+
+Validates the roles and permissions of the group, and creates asynchronous jobs to terminate the group's sessions.
+
+```
+USAGE
+  $ box groups:terminate-session
+
+OPTIONS
+  -h, --help                             Show CLI help
+  -q, --quiet                            Suppress any non-error output to stderr
+  -s, --save                             Save report to default reports folder on disk
+  -t, --token=token                      Provide a token to perform this call
+  -v, --verbose                          Show verbose output, which can be helpful for debugging
+  -y, --yes                              Automatically respond yes to all confirmation prompts
+  --as-user=as-user                      Provide an ID for a user
+  --bulk-file-path=bulk-file-path        File path to bulk .csv or .json objects
+  --csv                                  Output formatted CSV
+  --fields=fields                        Comma separated list of fields to show
+  --group-ids=group-ids                  (required) A list of group IDs
+  --json                                 Output formatted JSON
+  --no-color                             Turn off colors for logging
+  --save-to-file-path=save-to-file-path  Override default file path to save report
+
+ALIASES
+  $ box groups:terminate-session
+
+EXAMPLE
+  box groups:terminate-session --group-ids 123 345
+```
+
+_See code: [src/commands/groups/terminate-session.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/groups/terminate-session.js)_
 
 ## `box groups:update ID`
 
@@ -441,4 +489,4 @@ EXAMPLE
   box groups:update 12345 --name "U.S. Employees"
 ```
 
-_See code: [src/commands/groups/update.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/groups/update.js)_
+_See code: [src/commands/groups/update.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/groups/update.js)_

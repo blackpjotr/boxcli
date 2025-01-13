@@ -893,6 +893,7 @@ describe('Folders', () => {
 
 		describe(command, () => {
 			let folderId = '0',
+				vanityName = 'my-custom-name-123',
 				createSharedLinkFixture = getFixture('folders/put_folders_id_shared_link'),
 				unshareDate = '2030-03-04T12:34:56+00:00',
 				jsonOutput = getFixture('output/folders_share_json.txt'),
@@ -902,7 +903,8 @@ describe('Folders', () => {
 				shared_link: {
 					permissions: { can_download: true },
 					access: 'test',
-					password: 'test'
+					password: 'test',
+					vanity_name: vanityName
 				}
 			};
 
@@ -918,6 +920,7 @@ describe('Folders', () => {
 					'--access=test',
 					'--password=test',
 					'--can-download',
+					`--vanity-name=${vanityName}`,
 					'--json',
 					'--token=test'
 				])
@@ -937,6 +940,7 @@ describe('Folders', () => {
 					'--access=test',
 					'--password=test',
 					'--can-download',
+					`--vanity-name=${vanityName}`,
 					'--token=test'
 				])
 				.it('should create a shared link for a Box item with access, password and can-download flags passed (YAML Output)', ctx => {
@@ -1017,12 +1021,13 @@ describe('Folders', () => {
 			test
 				.nock(TEST_API_ROOT, api => api
 					.get(`/2.0/folders/${folderId}/items`)
-					.query({ usemarker: true })
+					.query({ usemarker: true, limit: 1000 })
 					.reply(200, fixture)
 					.get(`/2.0/folders/${folderId}/items`)
 					.query({
 						usemarker: true,
 						marker: 'page_1_marker',
+						limit: 1000,
 					})
 					.reply(200, fixture2)
 				)
@@ -1044,6 +1049,7 @@ describe('Folders', () => {
 						sort,
 						direction,
 						usemarker: true,
+						limit: 1000
 					})
 					.reply(200, fixture)
 					.get(`/2.0/folders/${folderId}/items`)
@@ -1052,6 +1058,7 @@ describe('Folders', () => {
 						direction,
 						usemarker: true,
 						marker: 'page_1_marker',
+						limit: 1000
 					})
 					.reply(200, fixture2)
 				)
@@ -1074,6 +1081,7 @@ describe('Folders', () => {
 					.query({
 						fields: 'created_at',
 						usemarker: true,
+						limit: 1000
 					})
 					.reply(200, fixture)
 					.get(`/2.0/folders/${folderId}/items`)
@@ -1081,6 +1089,7 @@ describe('Folders', () => {
 						fields: 'created_at',
 						usemarker: true,
 						marker: 'page_1_marker',
+						limit: 1000
 					})
 					.reply(200, fixture2)
 				)
@@ -1166,9 +1175,26 @@ describe('Folders', () => {
 					...expectedBody,
 					description,
 				})
-				.reply(201, fixture)
+				.reply(409, {
+					type: 'error',
+					status: 409,
+					code: 'item_name_in_use',
+					context_info: {
+						conflicts: [
+							{
+								type: 'folder',
+								id: '12345',
+								name: 'New Folder'
+							}
+						]
+					},
+					help_url: 'http://developers.box.com/docs/#errors',
+					message: 'Item with the same name already exists',
+					request_id: '1wne91fxf8871ide'
+				})
 			)
 			.stdout()
+			.stderr()
 			.command([
 				'folders:create',
 				parentFolderId,
@@ -1177,15 +1203,23 @@ describe('Folders', () => {
 				'--json',
 				'--token=test'
 			])
-			.it('should send the description param when --description is passed', ctx => {
-				assert.equal(ctx.stdout, fixture);
+			.it('should catch and report errors with detailed context info', ctx => {
+				let expectedErrorOutput = `Unexpected API Response [409 Conflict | 1wne91fxf8871ide] item_name_in_use - Item with the same name already exists${os.EOL}`;
+				expectedErrorOutput += `Conflicts:${os.EOL}`;
+				expectedErrorOutput += `    -${os.EOL}`;
+				expectedErrorOutput += `        Type: folder${os.EOL}`;
+				expectedErrorOutput += `        ID: '12345'${os.EOL}`;
+				expectedErrorOutput += `        Name: New Folder${os.EOL}`;
+
+				assert.equal(ctx.stdout, '');
+				assert.equal(ctx.stderr, expectedErrorOutput);
 			});
 	});
 
 	describe('folders:update', () => {
 		let folderId = '0',
 			name = 'New Folder',
-			description = 'New description',
+			description = 'New \ndescription',
 			tags = 'foo,bar',
 			fixture = getFixture('folders/put_folders_id'),
 			yamlOutput = getFixture('output/folders_update_yaml.txt');
@@ -1299,6 +1333,22 @@ describe('Folders', () => {
 			'no restrict to enterprise flag': [
 				'--no-restrict-to-enterprise',
 				{is_collaboration_restricted_to_enterprise: false}
+			],
+			'can non owners invite flag': [
+				'--can-non-owners-invite',
+				{can_non_owners_invite: true}
+			],
+			'no can non owners invite flag': [
+				'--no-can-non-owners-invite',
+				{can_non_owners_invite: false}
+			],
+			'can non owners view collaborations flag': [
+				'--can-non-owners-view-collaborators',
+				{can_non_owners_view_collaborators: true}
+			],
+			'no can non owners view collaborations flag': [
+				'--no-can-non-owners-view-collaborators',
+				{can_non_owners_view_collaborators: false}
 			],
 			'upload email access flag': [
 				'--upload-email-access=open',
@@ -1470,20 +1520,20 @@ describe('Folders', () => {
 			}
 		};
 
-		async function getDirectoryContents(folderPath) {
-
+		function getDirectoryContents(folderPath) {
+			/* eslint-disable no-sync */
 			let obj = {};
-			let folderContents = await fs.readdir(folderPath);
-			folderContents.forEach(async item => {
+			let folderContents = fs.readdirSync(folderPath);
+			folderContents.forEach(item => {
 				let itemPath = path.join(folderPath, item);
-				let stat = await fs.stat(itemPath);
+				let stat = fs.statSync(itemPath);
 				if (stat.isDirectory()) {
-					obj[item] = await getDirectoryContents(itemPath);
+					obj[item] = getDirectoryContents(itemPath);
 				} else {
-					obj[item] = await fs.readFile(itemPath, 'utf8');
+					obj[item] = fs.readFileSync(itemPath, 'utf8');
 				}
 			});
-
+			/* eslint-enable no-sync */
 			return obj;
 		}
 
@@ -1518,7 +1568,7 @@ describe('Folders', () => {
 			])
 			.it('should download folder to specified path on disk when called with destination flag', async ctx => {
 				let folderPath = path.join(downloadPath, folderName);
-				let actualContents = await getDirectoryContents(folderPath);
+				let actualContents = getDirectoryContents(folderPath);
 				await fs.remove(downloadPath);
 
 				assert.deepEqual(actualContents, expectedContents);
@@ -1572,7 +1622,7 @@ describe('Folders', () => {
 					manyFilesExpectedContents[`file ${i}.txt`] = `File ${i} contents`;
 				}
 				let folderPath = path.join(downloadPath, folderName);
-				let actualContents = await getDirectoryContents(folderPath);
+				let actualContents = getDirectoryContents(folderPath);
 				await fs.remove(downloadPath);
 
 				assert.deepEqual(actualContents, manyFilesExpectedContents);
@@ -1605,7 +1655,7 @@ describe('Folders', () => {
 			])
 			.it('should only download files in top-level folder when --depth=0 flag is passed', async ctx => {
 				let folderPath = path.join(downloadPath, folderName);
-				let actualContents = await getDirectoryContents(folderPath);
+				let actualContents = getDirectoryContents(folderPath);
 				await fs.remove(downloadPath);
 
 				assert.deepEqual(actualContents, _.omit(expectedContents, 'subfolder'));
@@ -1709,7 +1759,7 @@ describe('Folders', () => {
 			])
 			.it('should download a folder a non-existent path', async(ctx) => {
 				let folderPath = path.join(destination, folderName);
-				let actualContents = await getDirectoryContents(folderPath);
+				let actualContents = getDirectoryContents(folderPath);
 				await fs.remove(destination);
 
 				assert.deepEqual(actualContents, expectedContents);
@@ -1746,12 +1796,201 @@ describe('Folders', () => {
 			])
 			.it('should download a folder to a default destination', async(ctx) => {
 				let folderPath = path.join(DEFAULT_DOWNLOAD_PATH, folderName);
-				let actualContents = await getDirectoryContents(folderPath);
+				let actualContents = getDirectoryContents(folderPath);
 				await fs.remove(folderPath);
 
 				assert.deepEqual(actualContents, expectedContents);
 				assert.equal(ctx.stdout, '');
 			});
+
+		test
+			.nock(TEST_API_ROOT, api => api
+				.get(`/2.0/folders/${folderID}`)
+				.reply(200, getFolderFixture)
+				.get('/2.0/folders/22222')
+				.reply(200, getSubfolderFixture)
+				.get('/2.0/files/77777/content')
+				.reply(302, '', { Location: `${TEST_DOWNLOAD_ROOT}/77777` })
+				.get('/2.0/files/44444/content')
+				.reply(302, '', { Location: `${TEST_DOWNLOAD_ROOT}/44444` })
+				.get('/2.0/files/55555/content')
+				.reply(302, '', { Location: `${TEST_DOWNLOAD_ROOT}/55555` })
+			)
+			.nock(TEST_DOWNLOAD_ROOT, api => api
+				.get('/44444')
+				.reply(200, expectedContents['file 1.txt'])
+				.get('/55555')
+				.reply(200, expectedContents['file 2.txt'])
+				.get('/77777')
+				.reply(200, expectedContents.subfolder['subfolder file 1.txt'])
+			)
+			.do(() => {
+				/* eslint-disable no-sync */
+				const folderPath = path.join(destination, folderName);
+				if (fs.existsSync(destination)) {
+					fs.removeSync(destination);
+				}
+				fs.mkdirSync(destination);
+				fs.mkdirSync(folderPath);
+				fs.writeFileSync(path.join(folderPath, 'file 1.txt'), 'test123');
+				/* eslint-enable no-sync */
+			})
+			.stdout()
+			.stderr()
+			.command([
+				'folders:download',
+				folderID,
+				`--destination=${destination}`,
+				'--no-color',
+				'--token=test',
+			])
+			.it('should download and overwrite existing folder', async(ctx) => {
+				let folderPath = path.join(destination, folderName);
+				let actualContents = getDirectoryContents(folderPath);
+				await fs.remove(destination);
+
+				assert.deepEqual(actualContents, expectedContents);
+				assert.equal(ctx.stdout, '');
+			});
+
+		test
+			.nock(TEST_API_ROOT, api => api
+				.get(`/2.0/folders/${folderID}`)
+				.reply(200, getFolderFixture)
+				.get('/2.0/folders/22222')
+				.reply(200, getSubfolderFixture)
+				.get('/2.0/files/77777/content')
+				.reply(302, '', { Location: `${TEST_DOWNLOAD_ROOT}/77777` })
+				.get('/2.0/files/55555/content')
+				.reply(302, '', { Location: `${TEST_DOWNLOAD_ROOT}/55555` })
+			)
+			.nock(TEST_DOWNLOAD_ROOT, api => api
+				.get('/55555')
+				.reply(200, expectedContents['file 2.txt'])
+				.get('/77777')
+				.reply(200, expectedContents.subfolder['subfolder file 1.txt'])
+			)
+			.do(() => {
+				/* eslint-disable no-sync */
+				const folderPath = path.join(destination, folderName);
+				if (fs.existsSync(destination)) {
+					fs.removeSync(destination);
+				}
+				fs.mkdirSync(destination);
+				fs.mkdirSync(folderPath);
+				fs.writeFileSync(path.join(folderPath, 'file 1.txt'), 'test123');
+				/* eslint-enable no-sync */
+			})
+			.stdout()
+			.stderr()
+			.command([
+				'folders:download',
+				folderID,
+				`--destination=${destination}`,
+				'--no-color',
+				'--no-overwrite',
+				'--token=test',
+			])
+			.it('should not overwrite existing folder when --no-overwrite flag is passed', async(ctx) => {
+				let folderPath = path.join(destination, folderName);
+				let actualContents = getDirectoryContents(folderPath);
+				await fs.remove(destination);
+				assert.equal(actualContents['file 1.txt'], 'test123');
+				assert.equal(ctx.stdout, '');
+			});
+
+		test
+			.nock(TEST_API_ROOT, api => api
+				.get(`/2.0/folders/${folderID}`)
+				.reply(200, getFolderFixture)
+				.get('/2.0/files/55555/content')
+				.reply(302, '', { Location: `${TEST_DOWNLOAD_ROOT}/55555` })
+			)
+			.nock(TEST_DOWNLOAD_ROOT, api => api
+				.get('/55555')
+				.reply(200, expectedContents['file 2.txt'])
+			)
+			.do(() => {
+				/* eslint-disable no-sync */
+				const folderPath = path.join(destination, folderName);
+				if (fs.existsSync(destination)) {
+					fs.removeSync(destination);
+				}
+				fs.mkdirSync(destination);
+				fs.mkdirSync(folderPath);
+				fs.mkdirSync(path.join(folderPath, 'subfolder'));
+				fs.writeFileSync(path.join(folderPath, 'file 1.txt'), 'test123');
+				/* eslint-enable no-sync */
+			})
+			.stdout()
+			.stderr()
+			.command([
+				'folders:download',
+				folderID,
+				`--destination=${destination}`,
+				'--no-color',
+				'--no-overwrite',
+				'--depth=0',
+				'--token=test',
+			])
+			.it('should not overwrite existing file and folder in root folder when --no-overwrite and --depth=0 flag is passed', async(ctx) => {
+				let folderPath = path.join(destination, folderName);
+				let actualContents = getDirectoryContents(folderPath);
+				await fs.remove(destination);
+				assert.equal(actualContents['file 1.txt'], 'test123');
+				assert.equal(Object.keys(actualContents.subfolder).length, 0);
+				assert.equal(ctx.stdout, '');
+			});
+
+		test
+			.nock(TEST_API_ROOT, api => api
+				.get(`/2.0/folders/${folderID}`)
+				.reply(200, getFolderFixture)
+				.get('/2.0/folders/22222')
+				.reply(200, getSubfolderFixture)
+				.get('/2.0/files/77777/content')
+				.reply(302, '', { Location: `${TEST_DOWNLOAD_ROOT}/77777` })
+				.get('/2.0/files/55555/content')
+				.reply(302, '', { Location: `${TEST_DOWNLOAD_ROOT}/55555` })
+			)
+			.nock(TEST_DOWNLOAD_ROOT, api => api
+				.get('/55555')
+				.reply(200, expectedContents['file 2.txt'])
+				.get('/77777')
+				.reply(200, expectedContents.subfolder['subfolder file 1.txt'])
+			)
+			.do(() => {
+				/* eslint-disable no-sync */
+				const folderPath = path.join(destination, folderName);
+				if (fs.existsSync(destination)) {
+					fs.removeSync(destination);
+				}
+				fs.mkdirSync(destination);
+				fs.mkdirSync(folderPath);
+				fs.mkdirSync(path.join(folderPath, 'subfolder'));
+				fs.writeFileSync(path.join(folderPath, 'file 1.txt'), 'test123');
+				/* eslint-enable no-sync */
+			})
+			.stdout()
+			.stderr()
+			.command([
+				'folders:download',
+				folderID,
+				`--destination=${destination}`,
+				'--no-color',
+				'--no-overwrite',
+				'--depth=10',
+				'--token=test',
+			])
+			.it('should not overwrite existing file and folder in folder recursively when --no-overwrite and --depth=10 flag is passed', async(ctx) => {
+				let folderPath = path.join(destination, folderName);
+				let actualContents = getDirectoryContents(folderPath);
+				await fs.remove(destination);
+				assert.equal(actualContents['file 1.txt'], 'test123');
+				assert.equal(Object.keys(actualContents.subfolder).length, 1);
+				assert.equal(ctx.stdout, '');
+			});
+
 	});
 
 	describe('folders:locks', () => {

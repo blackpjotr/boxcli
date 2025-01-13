@@ -11,7 +11,10 @@ param (
     [string]$FolderID = "",
 
 # Set to a specific Box user id if you would like to pull metadata as a specific user instead of the current user
-    [string]$UserId = ""
+    [string]$UserId = "",
+
+# If enabled, the "displayName" of the metadata template field will be used as the header instead of the "key"
+    [switch]$UseDisplayName = $false
 )
 
 #############################################################################
@@ -228,6 +231,8 @@ Function Start-Metadata-Extraction {
     }
 
     Write-Log "Output $($Entries | Out-String)"
+    $MetadataTemplatesHashmap = @{}
+    $HeaderFieldName = If ($UseDisplayName) { 'displayName' } Else { 'key' }
 
     ForEach ($Item in $Entries) {
         $ItemID = $Item.id
@@ -263,12 +268,43 @@ Function Start-Metadata-Extraction {
 
         #Loop through each metadata entry to add additional folder info & separate according to metadata template
         ForEach ($MetadataValue in $Metadata) {
+            $TemplateKey = $MetadataValue."`$template"
+
+            #Pull MetadataTemplate to get access to all it's fields and put it in a hashmap.
+            if (!$MetadataTemplatesHashmap.ContainsKey($TemplateKey)) {
+                Write-Log "Pulling MetadataTemplate for templateKey: $TemplateKey" -output true -color Green
+                Try {
+                    if (!$UserId) {
+                        $MetadataTemplateResp = (box metadata-templates:get $TemplateKey --json 2>&1)
+                    } else {
+                        $MetadataTemplateResp = (box metadata-templates:get $TemplateKey --as-user=$UserId --json 2>&1)
+                    }
+
+                    $MetadataTemplate = $MetadataTemplateResp | ConvertFrom-Json
+                    $MetadataTemplatesHashmap[$TemplateKey] = $MetadataTemplate
+                }  Catch {
+                    Write-Log "Could not get the metadata template for item. See error log for details." -errorMessage $MetadataTemplateResp -output True -color Red
+                }
+            }
+
+            #Prepare the MetadataValue object by setting its fields name based on the passed UseDisplayName flag,
+            #which determines the name of the field used in the variable HeaderFieldName.
+            foreach ($MetadataTemplateField in $MetadataTemplatesHashmap[$TemplateKey].fields){
+                #To maintain the continuity of fields from the metadata template in the resulting CSV file, we remove and then add them at the end
+                if ($MetadataValue.PSObject.Properties.Name -contains $($MetadataTemplateField.key)) {
+                    $metadataFieldValue = $MetadataValue.$($MetadataTemplateField.key);
+                    $MetadataValue.PSObject.Properties.Remove($($MetadataTemplateField.key));
+                    $MetadataValue | Add-Member -NotePropertyName "$($MetadataTemplateField.$HeaderFieldName)" -NotePropertyValue $metadataFieldValue;
+                } else {
+                    #We add a field with an empty value so that it's included in the CSV file header, ensuring that subsequent items with this field will also be added
+                    $MetadataValue | Add-Member -NotePropertyName "$($MetadataTemplateField.$HeaderFieldName)" -NotePropertyValue $null;
+                }
+            }
+
             #Append Object Info values: Name, Object Id, Type
             $MetadataValue | Add-Member -NotePropertyName "Name" -NotePropertyValue $Item.name;
             $MetadataValue | Add-Member -NotePropertyName "Object Id" -NotePropertyValue $Item.id;
             $MetadataValue | Add-Member -NotePropertyName "Type" -NotePropertyValue $Item.type;
-
-            $Templatekey = $MetadataValue."`$template"
 
             #Export metadata values to separate csv's according to metadata template keys
             $MetadataValue | Export-Csv -Path ./MetadataTemplate_$Templatekey`.csv -Append -Force -NoTypeInformation

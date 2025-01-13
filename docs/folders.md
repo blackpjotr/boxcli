@@ -60,7 +60,7 @@ EXAMPLE
   box folders:collaborations 22222
 ```
 
-_See code: [src/commands/folders/collaborations/index.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/collaborations/index.js)_
+_See code: [src/commands/folders/collaborations/index.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/collaborations/index.js)_
 
 ## `box folders:collaborations:add ID`
 
@@ -132,7 +132,7 @@ EXAMPLE
   box folders:collaborations:add 22222 --role editor --user-id 33333
 ```
 
-_See code: [src/commands/folders/collaborations/add.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/collaborations/add.js)_
+_See code: [src/commands/folders/collaborations/add.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/collaborations/add.js)_
 
 ## `box folders:copy ID PARENTID`
 
@@ -167,7 +167,7 @@ EXAMPLE
   box folders:copy 22222 44444
 ```
 
-_See code: [src/commands/folders/copy.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/copy.js)_
+_See code: [src/commands/folders/copy.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/copy.js)_
 
 ## `box folders:create PARENTID NAME`
 
@@ -202,7 +202,7 @@ EXAMPLE
   box folders:create 22222 "New Subfolder"
 ```
 
-_See code: [src/commands/folders/create.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/create.js)_
+_See code: [src/commands/folders/create.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/create.js)_
 
 ## `box folders:delete ID`
 
@@ -237,7 +237,7 @@ EXAMPLE
   box folders:delete 22222
 ```
 
-_See code: [src/commands/folders/delete.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/delete.js)_
+_See code: [src/commands/folders/delete.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/delete.js)_
 
 ## `box folders:download ID`
 
@@ -266,6 +266,7 @@ OPTIONS
   --fields=fields                        Comma separated list of fields to show
   --json                                 Output formatted JSON
   --no-color                             Turn off colors for logging
+  --[no-]overwrite                       [default: true] Overwrite the folder if it already exists.
   --save-to-file-path=save-to-file-path  Override default file path to save report
   --zip                                  Download the folder into a single .zip archive
 
@@ -273,7 +274,7 @@ EXAMPLE
   box folders:download 22222
 ```
 
-_See code: [src/commands/folders/download.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/download.js)_
+_See code: [src/commands/folders/download.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/download.js)_
 
 ## `box folders:get ID`
 
@@ -305,7 +306,7 @@ EXAMPLE
   box folders:get 22222
 ```
 
-_See code: [src/commands/folders/get.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/get.js)_
+_See code: [src/commands/folders/get.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/get.js)_
 
 ## `box folders:items ID`
 
@@ -331,8 +332,16 @@ OPTIONS
   --direction=ASC|DESC                   The direction to order returned items
   --fields=fields                        Comma separated list of fields to show
   --json                                 Output formatted JSON
+
+  --max-items=max-items                  A value that indicates the maximum number of results to return. This only
+                                         specifies a maximum boundary and will not guarantee the minimum number of
+                                         results returned. When the max-items (x) is greater than 1000, then the maximum
+                                         ceil(x/1000) requests will be made.
+
   --no-color                             Turn off colors for logging
+
   --save-to-file-path=save-to-file-path  Override default file path to save report
+
   --sort=id|name|date                    The parameter to sort returned items
 
 ALIASES
@@ -342,7 +351,7 @@ EXAMPLE
   box folders:items 22222
 ```
 
-_See code: [src/commands/folders/items.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/items.js)_
+_See code: [src/commands/folders/items.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/items.js)_
 
 ## `box folders:locks ID`
 
@@ -377,7 +386,7 @@ EXAMPLE
   box folders:locks 22222
 ```
 
-_See code: [src/commands/folders/locks/index.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/locks/index.js)_
+_See code: [src/commands/folders/locks/index.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/locks/index.js)_
 
 ## `box folders:locks:create ID`
 
@@ -409,7 +418,7 @@ EXAMPLE
   box folders:locks:create 22222
 ```
 
-_See code: [src/commands/folders/locks/create.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/locks/create.js)_
+_See code: [src/commands/folders/locks/create.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/locks/create.js)_
 
 ## `box folders:locks:delete ID`
 
@@ -441,7 +450,7 @@ EXAMPLE
   box folders:locks:delete 22222
 ```
 
-_See code: [src/commands/folders/locks/delete.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/locks/delete.js)_
+_See code: [src/commands/folders/locks/delete.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/locks/delete.js)_
 
 ## `box folders:metadata ID`
 
@@ -476,7 +485,7 @@ EXAMPLE
   box folders:metadata 22222
 ```
 
-_See code: [src/commands/folders/metadata/index.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/metadata/index.js)_
+_See code: [src/commands/folders/metadata/index.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/metadata/index.js)_
 
 ## `box folders:metadata:add ID`
 
@@ -518,11 +527,13 @@ OPTIONS
 ALIASES
   $ box folders:metadata:create
 
-EXAMPLE
+EXAMPLES
   box folders:metadata:add 22222 --template-key employeeRecord --data "name=John Doe" --data department=Sales
+  box folders:metadata:add 22222 --template-key myTemplate --data "multiselectkey1=[option1A,option1B]" --data 
+  "multiselectkey2=[option2A]"
 ```
 
-_See code: [src/commands/folders/metadata/add.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/metadata/add.js)_
+_See code: [src/commands/folders/metadata/add.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/metadata/add.js)_
 
 ## `box folders:metadata:get ID`
 
@@ -556,7 +567,7 @@ EXAMPLE
   box folders:metadata:get 22222 --template-key employeeRecord
 ```
 
-_See code: [src/commands/folders/metadata/get.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/metadata/get.js)_
+_See code: [src/commands/folders/metadata/get.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/metadata/get.js)_
 
 ## `box folders:metadata:remove ID`
 
@@ -593,7 +604,7 @@ EXAMPLE
   box folders:metadata:remove 22222 --scope global --template-key properties
 ```
 
-_See code: [src/commands/folders/metadata/remove.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/metadata/remove.js)_
+_See code: [src/commands/folders/metadata/remove.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/metadata/remove.js)_
 
 ## `box folders:metadata:set ID`
 
@@ -632,11 +643,13 @@ OPTIONS
 
   --template-key=template-key            (required) The key of the metadata template to use
 
-EXAMPLE
+EXAMPLES
   box folders:metadata:set 22222 --template-key employeeRecord --data "name=John Doe" --data department=Sales
+  box folders:metadata:set 22222 --template-key myTemplate --data "multiselectkey1=[option1A,option1B]" --data 
+  "multiselectkey2=[option2A]"
 ```
 
-_See code: [src/commands/folders/metadata/set.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/metadata/set.js)_
+_See code: [src/commands/folders/metadata/set.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/metadata/set.js)_
 
 ## `box folders:metadata:update ID`
 
@@ -699,7 +712,7 @@ EXAMPLE
   box folders:metadata:update 22222 --template-key employeeRecord --replace department=Finance
 ```
 
-_See code: [src/commands/folders/metadata/update.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/metadata/update.js)_
+_See code: [src/commands/folders/metadata/update.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/metadata/update.js)_
 
 ## `box folders:move ID PARENTID`
 
@@ -733,7 +746,7 @@ EXAMPLE
   box folders:move 22222 44444
 ```
 
-_See code: [src/commands/folders/move.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/move.js)_
+_See code: [src/commands/folders/move.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/move.js)_
 
 ## `box folders:rename ID NAME`
 
@@ -768,7 +781,7 @@ EXAMPLE
   box folders:rename 22222 "New Folder Name"
 ```
 
-_See code: [src/commands/folders/rename.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/rename.js)_
+_See code: [src/commands/folders/rename.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/rename.js)_
 
 ## `box folders:share ID`
 
@@ -803,15 +816,19 @@ OPTIONS
                                          for hours, d for days, w for weeks, M for months. For example, 30 seconds is
                                          30s from now.
 
+  --vanity-name=vanity-name              Defines a custom vanity name to use in the shared link URL. It should be
+                                         between 12 and 30 characters. This field can contains only letters, numbers and
+                                         hyphens.
+
 ALIASES
   $ box folders:shared-links:create
   $ box folders:shared-links:update
 
 EXAMPLE
-  box folders:share 22222 --access company
+  box folders:share 22222 --access company --vanity-name my-custom-name-123
 ```
 
-_See code: [src/commands/folders/share.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/share.js)_
+_See code: [src/commands/folders/share.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/share.js)_
 
 ## `box folders:unshare ID`
 
@@ -846,7 +863,7 @@ EXAMPLE
   box folders:unshare 22222
 ```
 
-_See code: [src/commands/folders/unshare.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/unshare.js)_
+_See code: [src/commands/folders/unshare.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/unshare.js)_
 
 ## `box folders:update ID`
 
@@ -868,13 +885,27 @@ OPTIONS
   -y, --yes                                 Automatically respond yes to all confirmation prompts
   --as-user=as-user                         Provide an ID for a user
   --bulk-file-path=bulk-file-path           File path to bulk .csv or .json objects
+
+  --[no-]can-non-owners-invite              Specifies if users who are not the owner of the folder can invite new
+                                            collaborators to the folder.
+
+  --[no-]can-non-owners-view-collaborators  Restricts collaborators who are not the owner of this folder from viewing
+                                            other collaborations on this folder.
+
   --csv                                     Output formatted CSV
+
   --description=description                 New description for folder
+
   --etag=etag                               Only apply updates if the etag value matches
+
   --fields=fields                           Comma separated list of fields to show
+
   --json                                    Output formatted JSON
+
   --name=name                               New name for folder
+
   --no-color                                Turn off colors for logging
+
   --[no-]restrict-collaboration             Restrict collaboration so only owners can invite new collaborators
 
   --[no-]restrict-to-enterprise             Restrict collaboration so only users in the folder owner's enterprise can be
@@ -892,7 +923,7 @@ EXAMPLE
   box folders:update 22222 --name "New Folder Name"
 ```
 
-_See code: [src/commands/folders/update.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/update.js)_
+_See code: [src/commands/folders/update.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/update.js)_
 
 ## `box folders:upload PATH`
 
@@ -927,4 +958,4 @@ EXAMPLE
   box folders:upload /path/to/folder
 ```
 
-_See code: [src/commands/folders/upload.js](https://github.com/box/boxcli/blob/v3.5.0/src/commands/folders/upload.js)_
+_See code: [src/commands/folders/upload.js](https://github.com/box/boxcli/blob/v3.16.0/src/commands/folders/upload.js)_

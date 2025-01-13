@@ -111,6 +111,41 @@ describe('Retention Policies', () => {
 			.it('should send optional params when flags are passed', ctx => {
 				assert.equal(ctx.stdout, fixture);
 			});
+
+		test
+			.nock(TEST_API_ROOT, api => api
+				.post('/2.0/retention_policies', {
+					...expectedBody,
+					policy_type: 'finite',
+					retention_length: retentionLength,
+					description: 'This is a description',
+					custom_notification_recipients: [{
+						type: 'user',
+						id: '12345',
+						login: 'user@box.com'
+					}, {
+						type: 'user',
+						id: '34567',
+						login: 'user2@box.com'
+					}]
+				})
+				.reply(201, fixture)
+			)
+			.stdout()
+			.command([
+				'retention-policies:create',
+				policyName,
+				`--disposition-action=${dispositionAction}`,
+				`--retention-length=${retentionLength}`,
+				'--description=This is a description',
+				'--custom-notification-recipient=id=12345,login=user@box.com',
+				'--custom-notification-recipient=id=34567,login=user2@box.com',
+				'--json',
+				'--token=test'
+			])
+			.it('should create a new retention policy with custom description and custom notification recipients', ctx => {
+				assert.equal(ctx.stdout, fixture);
+			});
 	});
 
 	describe('retention-policies:update', () => {
@@ -270,10 +305,12 @@ describe('Retention Policies', () => {
 		test
 			.nock(TEST_API_ROOT, api => api
 				.get('/2.0/retention_policies')
+				.query({limit: 1000})
 				.reply(200, fixture)
 				.get('/2.0/retention_policies')
 				.query({
-					marker: 'ZDE345'
+					marker: 'ZDE345',
+					limit: 1000
 				})
 				.reply(200, fixture2)
 			)
@@ -295,6 +332,7 @@ describe('Retention Policies', () => {
 					policy_name: policyName,
 					policy_type: policyType,
 					created_by_user_id: creatorID,
+					limit: 1000
 				})
 				.reply(200, fixture)
 				.get('/2.0/retention_policies')
@@ -303,7 +341,8 @@ describe('Retention Policies', () => {
 					policy_name: policyName,
 					policy_type: policyType,
 					created_by_user_id: creatorID,
-					marker: 'ZDE345'
+					marker: 'ZDE345',
+					limit: 1000
 				})
 				.reply(200, fixture2)
 			)
@@ -449,6 +488,7 @@ describe('Retention Policies', () => {
 				.post('/2.0/retention_policy_assignments', {
 					...expectedBody,
 					assign_to: {
+						id: null,
 						type: 'enterprise',
 					}
 				})
@@ -466,6 +506,38 @@ describe('Retention Policies', () => {
 				assert.equal(ctx.stdout, fixture);
 			});
 
+		test
+			.nock(TEST_API_ROOT, api => api
+				.post('/2.0/retention_policy_assignments', {
+					...expectedBody,
+					assign_to: {
+						type: 'enterprise',
+						id: null
+					},
+					filter_fields: [
+						{
+							field: 'a0f4ee4e-1dc1-4h90-a8a9-aef55fc681d4',
+							value: '0c27b756-0p87-4fe0-a43a-59fb661ccc4e'
+						}
+					],
+					start_date_field: 'upload_date',
+				})
+				.reply(201, fixture)
+			)
+			.stdout()
+			.command([
+				'retention-policies:assign',
+				policyId,
+				'--assign-to-type=enterprise',
+				'--filter-field=a0f4ee4e-1dc1-4h90-a8a9-aef55fc681d4=0c27b756-0p87-4fe0-a43a-59fb661ccc4e',
+				'--start-date-field=upload_date',
+				'--json',
+				'--token=test'
+			])
+			.it('should assign policy to the enterprise with custom filter fields and start date field', ctx => {
+				assert.equal(ctx.stdout, fixture);
+			});
+
 		// @TODO(2018-08-21): Add test for missing ID error scenario
 	});
 
@@ -479,10 +551,12 @@ describe('Retention Policies', () => {
 		test
 			.nock(TEST_API_ROOT, api => api
 				.get(`/2.0/retention_policies/${policyId}/assignments`)
+				.query({limit: 1000})
 				.reply(200, fixture)
 				.get(`/2.0/retention_policies/${policyId}/assignments`)
 				.query({
-					marker: 'ZDE456'
+					marker: 'ZDE456',
+					limit: 1000
 				})
 				.reply(200, fixture2)
 			)
@@ -500,12 +574,13 @@ describe('Retention Policies', () => {
 		test
 			.nock(TEST_API_ROOT, api => api
 				.get(`/2.0/retention_policies/${policyId}/assignments`)
-				.query({ type })
+				.query({ type, limit: 1000 })
 				.reply(200, fixture)
 				.get(`/2.0/retention_policies/${policyId}/assignments`)
 				.query({
 					type,
-					marker: 'ZDE456'
+					marker: 'ZDE456',
+					limit: 1000
 				})
 				.reply(200, fixture2)
 			)
@@ -524,12 +599,13 @@ describe('Retention Policies', () => {
 		test
 			.nock(TEST_API_ROOT, api => api
 				.get(`/2.0/retention_policies/${policyId}/assignments`)
-				.query({fields: 'assigned_to'})
+				.query({fields: 'assigned_to', limit: 1000})
 				.reply(200, fixture)
 				.get(`/2.0/retention_policies/${policyId}/assignments`)
 				.query({
 					fields: 'assigned_to',
-					marker: 'ZDE456'
+					marker: 'ZDE456',
+					limit: 1000
 				})
 				.reply(200, fixture2)
 			)
@@ -604,10 +680,12 @@ describe('Retention Policies', () => {
 		test
 			.nock(TEST_API_ROOT, api => api
 				.get('/2.0/file_version_retentions')
+				.query({limit: 1000})
 				.reply(200, fixture)
 				.get('/2.0/file_version_retentions')
 				.query({
-					marker: 'ZAD345'
+					marker: 'ZAD345',
+					limit: 1000
 				})
 				.reply(200, fixture2)
 			)
@@ -655,12 +733,13 @@ describe('Retention Policies', () => {
 			test
 				.nock(TEST_API_ROOT, api => api
 					.get('/2.0/file_version_retentions')
-					.query(queryParams)
+					.query({...queryParams, limit: 1000})
 					.reply(200, fixture)
 					.get('/2.0/file_version_retentions')
 					.query({
 						...queryParams,
-						marker: 'ZAD345'
+						marker: 'ZAD345',
+						limit: 1000
 					})
 					.reply(200, fixture2)
 				)
@@ -687,10 +766,12 @@ describe('Retention Policies', () => {
 		test
 			.nock(TEST_API_ROOT, api => api
 				.get(`/2.0/retention_policy_assignments/${policyAssignmentId}/files_under_retention`)
+				.query({limit: 1000})
 				.reply(200, fixture)
 				.get(`/2.0/retention_policy_assignments/${policyAssignmentId}/files_under_retention`)
 				.query({
-					marker: 'ZAD345'
+					marker: 'ZAD345',
+					limit: 1000
 				})
 				.reply(200, fixture2)
 			)
@@ -716,10 +797,12 @@ describe('Retention Policies', () => {
 		test
 			.nock(TEST_API_ROOT, api => api
 				.get(`/2.0/retention_policy_assignments/${policyAssignmentId}/file_versions_under_retention`)
+				.query({limit: 1000})
 				.reply(200, fixture)
 				.get(`/2.0/retention_policy_assignments/${policyAssignmentId}/file_versions_under_retention`)
 				.query({
-					marker: 'ZAD345'
+					marker: 'ZAD345',
+					limit: 1000
 				})
 				.reply(200, fixture2)
 			)

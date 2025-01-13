@@ -37,6 +37,15 @@ class UserModule {
 			options.user_type = 'external';
 		}
 
+		if (flags.limit) {
+			options.limit = flags.limit;
+		}
+
+		// forcing offset based pagination for now. Using filter_term causes infinite loop because next_marker is never null
+		// if (flags.usemarker) {
+		// 	options.usemarker = flags.usemarker;
+		// }
+
 		if (flags.filter) {
 			options.filter_term = flags.filter;
 		}

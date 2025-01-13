@@ -216,12 +216,13 @@ describe('Users', () => {
 			test
 				.nock(TEST_API_ROOT, api => api
 					.get('/2.0/users')
-					.query({ filter_term: 'AppUser_' })
+					.query({ filter_term: 'AppUser_', limit: 1000 })
 					.reply(200, fixture)
 					.get('/2.0/users')
 					.query({
 						filter_term: 'AppUser_',
-						offset: 3
+						offset: 3,
+						limit: 1000,
 					})
 					.reply(200, fixture2)
 				)
@@ -239,12 +240,13 @@ describe('Users', () => {
 			test
 				.nock(TEST_API_ROOT, api => api
 					.get('/2.0/users')
-					.query({fields: 'name,address'})
+					.query({fields: 'name,address', limit: 1000})
 					.reply(200, fixture)
 					.get('/2.0/users')
 					.query({
 						fields: 'name,address',
-						offset: 3
+						offset: 3,
+						limit: 1000
 					})
 					.reply(200, fixture2)
 				)
@@ -273,10 +275,12 @@ describe('Users', () => {
 			test
 				.nock(TEST_API_ROOT, api => api
 					.get(`/2.0/users/${userId}/memberships`)
+					.query({limit: 1000})
 					.reply(200, fixture)
 					.get(`/2.0/users/${userId}/memberships`)
 					.query({
-						offset: 1
+						offset: 1,
+						limit: 1000
 					})
 					.reply(200, fixture2)
 				)
@@ -294,12 +298,13 @@ describe('Users', () => {
 			test
 				.nock(TEST_API_ROOT, api => api
 					.get(`/2.0/users/${userId}/memberships`)
-					.query({fields: 'name'})
+					.query({fields: 'name', limit: 1000})
 					.reply(200, fixture)
 					.get(`/2.0/users/${userId}/memberships`)
 					.query({
 						fields: 'name',
-						offset: 1
+						offset: 1,
+						limit: 1000
 					})
 					.reply(200, fixture2)
 				)
@@ -696,6 +701,23 @@ describe('Users', () => {
 				'--timezone=America/Los_Angeles',
 				{timezone: 'America/Los_Angeles'}
 			],
+			'tracking codes': [
+				'--tracking-codes=name1=value1,name2=value2',
+				{
+					tracking_codes: [
+						{
+							type: 'tracking_code',
+							name: 'name1',
+							value: 'value1',
+						},
+						{
+							type: 'tracking_code',
+							name: 'name2',
+							value: 'value2',
+						},
+					],
+				}
+			]
 		}, function(flag, body) {
 
 			test
@@ -881,6 +903,23 @@ describe('Users', () => {
 			'external ID flag': [
 				'--external-id=foo',
 				{external_app_user_id: 'foo'}
+			],
+			'tracking codes': [
+				'--tracking-codes=name1=value1,name2=value2',
+				{
+					tracking_codes: [
+						{
+							type: 'tracking_code',
+							name: 'name1',
+							value: 'value1',
+						},
+						{
+							type: 'tracking_code',
+							name: 'name2',
+							value: 'value2',
+						},
+					],
+				}
 			]
 		}, function(flag, body) {
 
@@ -941,4 +980,33 @@ describe('Users', () => {
 			});
 	});
 
+	describe('users:terminate-session', () => {
+		let userIDs = ['12345', '67890'];
+		let userLogins = ['user1@example.com', 'user2@example.com'];
+		let fixture = getFixture('users/post_users_terminate_sessions');
+
+		test
+			.nock(TEST_API_ROOT, api => api
+				.post('/2.0/users/terminate_sessions', {
+					user_ids: userIDs,
+					user_logins: userLogins
+				})
+				.reply(201, fixture)
+			)
+			.stdout()
+			.command([
+				'users:terminate-session',
+				'--user-ids',
+				'12345',
+				'67890',
+				'--user-logins',
+				'user1@example.com',
+				'user2@example.com',
+				'--json',
+				'--token=test'
+			])
+			.it('should terminate sessions for the specified users', ctx => {
+				assert.equal(ctx.stdout, fixture);
+			});
+	});
 });

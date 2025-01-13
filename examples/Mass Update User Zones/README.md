@@ -36,8 +36,8 @@ If you would like to use Admin Console for zone assignment, see [here](https://s
     PS /Users/mikechen>
     ```
 
-4. Setting up the CLI requires creating a Box application that uses server authentication with JWT. See the [Box CLI Using JWT Authentication][jwt-cli] page for instructions. 
-    * The Box application must have the following application **access level** enabled in the configuration page: `App + Enterprise Access`
+4. Setting up the CLI requires creating a Box platform application that uses server authentication with JWT. See the [Box CLI Using JWT Authentication][jwt-cli] page for instructions. 
+    * The Box platform application must have the following application **access level** enabled in the configuration page: `App + Enterprise Access`
     * The Box application must have the following **application scopes** enabled in the configuration page: `Manage Enterprise Properties`, `Manage Users`
     * The Box application must have the following **advanced features** enabled in the configuration page: `Generate User Access Tokens`
 
@@ -57,7 +57,7 @@ If you would like to use Admin Console for zone assignment, see [here](https://s
      Japan = "100004"          #Japan with in region uploads/downloads/previews
      Canada = "100005"         #Canada
      JapanSingapore = "100007" #Japan/Singapore with in region uploads/downloads/previews
-     UKGermany = "100008"      #UK/Germany
+     GermanyUK = "100008"      #Germany/UK
      UK = "100009"             #UK with in region uploads/downloads/previews
      France = "100012"         #France
      }

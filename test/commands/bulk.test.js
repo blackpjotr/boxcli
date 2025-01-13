@@ -35,7 +35,9 @@ describe('Bulk', () => {
 			multipleFlagValuesInputFilePath = path.join(__dirname, '../fixtures/bulk/input_multiple_same_flag.csv'),
 			emptyStringInputFilePath = path.join(__dirname, '../fixtures/bulk/input_with_empty_string.csv'),
 			metadataUpdateInputFilePath = path.join(__dirname, '../fixtures/bulk/input_metadata_update.csv'),
-			tableOutput = getFixture('bulk/post_collaborations_table.txt');
+			signRequestCreateInputFilePath = path.join(__dirname, '../fixtures/bulk/input_sign_request_create.csv'),
+			tableOutput = getFixture('bulk/post_collaborations_table.txt'),
+			createSignRequestFixture = getFixture('bulk/post_sign_requests');
 
 		let addCollaborationBody1 = {
 			item: {
@@ -451,6 +453,10 @@ describe('Bulk', () => {
 				expectedErrorOutput += `    login=wario@example.com${os.EOL}`;
 				expectedErrorOutput += `) failed with error:${os.EOL}`;
 				expectedErrorOutput += `Unexpected API Response [409 Conflict | 170397861659135cc65a65] collaboration_already_exists${os.EOL}`;
+				expectedErrorOutput += `Conflicts:${os.EOL}`;
+				expectedErrorOutput += `    -${os.EOL}`;
+				expectedErrorOutput += `        Type: collaboration${os.EOL}`;
+				expectedErrorOutput += `        ID: '871642494'${os.EOL}`;
 				expectedErrorOutput += os.EOL;
 
 				assert.equal(ctx.stdout, expectedOutput + os.EOL);
@@ -541,6 +547,80 @@ describe('Bulk', () => {
 				'--token=test'
 			])
 			.it('should send empty As-User header when not present in the bulk file');
+
+		const terminateSessionFixture = getFixture('bulk/post_terminate_sessions');
+		test
+			.nock(TEST_API_ROOT, api => api
+				.post('/2.0/users/terminate_sessions', {
+					user_logins: ['user1@example.com'],
+					user_ids: ['111']
+				})
+				.reply(201, terminateSessionFixture)
+				.post('/2.0/users/terminate_sessions', {
+					user_logins: ['user2@example.com'],
+					user_ids: ['222']
+				})
+				.reply(201, terminateSessionFixture)
+			)
+			.stdout()
+			.stderr()
+			.command([
+				'users:terminate-session',
+				`--bulk-file-path=${path.join(__dirname, '../fixtures/bulk/input_users_terminate_sessions.csv')}`,
+				'--json',
+				'--token=test'
+			])
+			.it('should send terminate sessions request with user ids and logins', ctx => {
+				let expectedOutput = [];
+				expectedOutput.push(JSON.parse(terminateSessionFixture));
+				expectedOutput.push(JSON.parse(terminateSessionFixture));
+				assert.deepEqual(JSON.parse(ctx.stdout), expectedOutput);
+			});
+
+		test
+			.nock(TEST_API_ROOT, api => api
+				.post('/2.0/groups/terminate_sessions', {
+					group_ids: ['111']
+				})
+				.reply(201, terminateSessionFixture)
+				.post('/2.0/groups/terminate_sessions', {
+					group_ids: ['222']
+				})
+				.reply(201, terminateSessionFixture)
+			)
+			.stdout()
+			.stderr()
+			.command([
+				'groups:terminate-session',
+				`--bulk-file-path=${path.join(__dirname, '../fixtures/bulk/input_groups_terminate_sessions.csv')}`,
+				'--json',
+				'--token=test'
+			])
+			.it('should send terminate sessions request with groups ids', ctx => {
+				let expectedOutput = [];
+				expectedOutput.push(JSON.parse(terminateSessionFixture));
+				expectedOutput.push(JSON.parse(terminateSessionFixture));
+				assert.deepEqual(JSON.parse(ctx.stdout), expectedOutput);
+			});
+
+		test
+		.nock(TEST_API_ROOT, api => api
+			.post('/2.0/sign_requests')
+			.reply(200, createSignRequestFixture)
+		)
+		.stdout()
+		.stderr()
+		.command([
+			'sign-requests:create',
+			`--bulk-file-path=${signRequestCreateInputFilePath}`,
+			'--json',
+			'--token=test'
+		])
+		.it('should correctly process commands that do not contain argument parameters', ctx => {
+			let expectedOutput = [];
+			expectedOutput.push(JSON.parse(createSignRequestFixture));
+			assert.deepEqual(JSON.parse(ctx.stdout), expectedOutput);
+		});
 	});
 
 	describe('JSON Input', () => {
@@ -1081,7 +1161,7 @@ describe('Bulk', () => {
 		test
 			.nock(TEST_API_ROOT, api => api
 				.get('/2.0/folders/0/items')
-				.query({ usemarker: true })
+				.query({ usemarker: true, limit: 1000 })
 				.reply(200, fixture3)
 			)
 			.stdout()
